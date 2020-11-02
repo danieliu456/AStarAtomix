@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.Scripts;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +27,12 @@ public class GameManager : MonoBehaviour
         }
 
         Atom = clickedOn;
+        // TEST STUFF
+        //var array = convertFromVectorToArrayIndex(Atom.transform.position);
+        //Debug.Log($"{array[0]}, {array[1]}");
+        //var vector = convertFromArrayToVectorPosition(array[0], array[1]);
+        //Debug.Log(vector);
+
         var atomBorder = Atom.transform.Find("atomBorder");
         //atomBorder.gameObject.SetActive(true);
         atomBorder.transform.GetComponent<SpriteRenderer>().enabled = true;
@@ -80,25 +87,57 @@ public class GameManager : MonoBehaviour
         StartCoroutine(ResetSceneAsync());
     }
 
-    public async void CalculateAStar()
+    public void CalculateAStar()
     {
-        Action calculate = new Action(() =>
+        StartCoroutine(AStarCoroutine());
+    }
+
+    IEnumerator AStarCoroutine()
+    {
+        Debug.Log("Starting A* calculation");
+        var currentAtoms = FindObjectsOfType<Atom>().Where(a => a.tag == "Atom").ToArray();
+        var targetAtoms = FindObjectsOfType<Atom>().Where(a => a.tag == "answer").ToArray();
+
+        Node[] currentNodes = new Node[currentAtoms.Length ];
+        Node[] targetNodes = new Node[currentAtoms.Length];
+        for (int i = 0; i < currentAtoms.Length; i++)
         {
-            Debug.Log("Starting A* calculation");
-            var atomList = FindObjectsOfType<Atom>().Where(a => a.tag == "Atom");
+            var postion = currentAtoms[i].transform.position;
+            var newPosition = convertFromVectorToArrayIndex(postion);
+            var vector = new Vector2(newPosition[0], newPosition[1]);
+            var name = currentAtoms[i].name;
 
-            foreach (var atom in atomList)
-            {
-                foreach (var item in "UDLR")
-                {
-                    setMainAtom(atom);
-                    atom.Move(item.getMovementCordinates());
-                }
-            }
-        });
+            var targetPostion = targetAtoms[i].transform.position;
+            var targetName = targetAtoms[i].name;
 
-        await Task.Run(calculate);
+            currentNodes[i] = new Node(vector, name);
+            targetNodes[i] = new Node(targetPostion, targetName);
+        }
 
+        
+        var currentPositions = new Positions(currentNodes);
+        var goalPositions = new Positions(targetNodes);
+        MapHelper mapHelper = new MapHelper(LevelBuilder.level.Rows, LevelBuilder.level.Answer);
+
+        List<string> map = mapHelper.convertToEmptyMap();
+         
+        var AStar = new AStar(currentPositions, goalPositions, map);
+        AStar.calculateAStar();
+
+        //var atomList = FindObjectsOfType<Atom>().Where(a => a.tag == "Atom");
+
+        //foreach (var atom in atomList)
+        //{
+        //    foreach (var item in "UDLR")
+        //    {
+        //        setMainAtom(atom);
+        //        atom.Move(item.getMovementCordinates());
+        //        NextLevelButton.SetActive(CheckIfLevelCompleted());
+
+        //        yield return new WaitForSeconds(0.5f);
+        //    }
+        //}
+        yield return new WaitForSeconds(0.5f);
     }
 
     private bool CheckIfLevelCompleted()
@@ -121,6 +160,7 @@ public class GameManager : MonoBehaviour
                         var firstAtom = findFirstAnswerAtom(atoms);
                         x = Convert.ToInt32(firstAtom.x);
                         y = Convert.ToInt32(firstAtom.y);
+
                         first = false;
                         rememberedXPosition = x - error;
                     } else
@@ -144,7 +184,7 @@ public class GameManager : MonoBehaviour
 
     }
 
-    private bool anyOfItemsIsInCorrectPossition(IEnumerable<Atom> atoms, int x, int y)
+    public bool anyOfItemsIsInCorrectPossition(IEnumerable<Atom> atoms, int x, int y)
     {
         foreach (var atom in atoms)
         {
@@ -156,7 +196,7 @@ public class GameManager : MonoBehaviour
         }
         return false;
     }
-    private Vector2 findFirstAnswerAtom(IEnumerable<Atom> atoms)
+    public Vector2 findFirstAnswerAtom(IEnumerable<Atom> atoms)
     {
         int x=200, y=-200;
         foreach (var atom in atoms)
@@ -209,5 +249,20 @@ public class GameManager : MonoBehaviour
     }
 
     // Update is called once per frame
- 
+    public int[] convertFromVectorToArrayIndex(Vector3 vector)
+    {
+        int x = Convert.ToInt32(vector.x);
+        int y = Convert.ToInt32(vector.y);
+        int errorX = LevelBuilder.level.Width / 2;
+        int errorY = LevelBuilder.level.Height / 2;
+        var cords = new int[] {x + errorX, (y - errorY) * -1 };
+        return cords;
+    }
+
+    public Vector3 convertFromArrayToVectorPosition(int x, int y)
+    {
+        int errorX = LevelBuilder.level.Width / 2;
+        int errorY = LevelBuilder.level.Height / 2;
+        return new Vector3(x - errorX,  (y - errorY)*-1, 0);
+    }
 }

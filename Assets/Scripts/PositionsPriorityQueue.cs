@@ -6,32 +6,23 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts
 {
-    public class Node<T>
+    public class PositionsPriorityQueue
     {
-        public Node(T unit, int priority)
-        {
-            Unit = unit;
-            Priority = priority;
-        }
-
-        public T Unit { get; set; }
-        public int Priority { get; set; }
-        public int G { get; set; }
-        public int H { get; set; }
-        public int F { get => G + H; }
-    }
-
-    public class PriorityQueue<T>
-    {
-        public List<Node<T>> Queue = new List<Node<T>>();
+        public List<Positions> Queue = new List<Positions>();
         int size = -1;
         public int Length { get => Queue.Count; }
         private int leftChild(int i) => (i * 2 + 1);
         private int rightChild(int i) => (i * 2 + 2);
 
-        public void Enqueue(Node<T> node)
+        public override bool Equals(object obj)
         {
-            Queue.Add(node);
+            return base.Equals(obj);
+
+        }
+
+        public void Enqueue(Positions positions)
+        {
+            Queue.Add(positions);
             size += 1;
             BuildMinHeap(size);
         }
@@ -39,7 +30,7 @@ namespace Assets.Scripts
         private void BuildMinHeap(int i) {
             // (i - 1) / 2 parrent index
             // i current index
-            while (i >= 0 && Queue[(i - 1) / 2].Priority > Queue[i].Priority)
+            while (i >= 0 && Queue[(i - 1) / 2].F > Queue[i].F)
             {
                 Swap(i, (i - 1) / 2);
                 i = (i - 1) / 2;
@@ -52,9 +43,9 @@ namespace Assets.Scripts
 
             int lowest = i;
 
-            if (leftChild <= size && Queue[lowest].Priority > Queue[leftChild].Priority)
+            if (leftChild <= size && Queue[lowest].F > Queue[leftChild].F)
                 lowest = leftChild;
-            if (rightChild <= size && Queue[lowest].Priority > Queue[rightChild].Priority)
+            if (rightChild <= size && Queue[lowest].F > Queue[rightChild].F)
                 lowest = rightChild;
 
             if (lowest != i)
@@ -65,11 +56,11 @@ namespace Assets.Scripts
         }
 
 
-        public T Dequeue()
+        public Positions Dequeue()
         {
             if (size > -1)
             {
-                var min = Queue[0].Unit;
+                var min = Queue[0];
                 Queue[0] = Queue[size];
                 Queue.RemoveAt(size);
                 size--;
@@ -85,6 +76,15 @@ namespace Assets.Scripts
             var temporary = Queue[destination];
             Queue[destination] = Queue[source];
             Queue[source] = temporary;
+        }
+
+        public bool Exists(Positions obj) {
+            foreach (var position in Queue)
+            {
+                if (position.Equals(obj))
+                    return true;
+            }
+            return false;
         }
     }
 }

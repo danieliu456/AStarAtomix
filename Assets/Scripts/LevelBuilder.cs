@@ -43,7 +43,7 @@ public class LevelBuilder : MonoBehaviour
         // Ieskom vidurio pozicijos, kad butu patogu generuoti zemelapi
         int RememberedXPosition = -level.Width / 2;
         int XPosition = -level.Width / 2;
-        int YPosition = -level.Height / 2;
+        int YPosition = level.Height / 2;
 
         foreach (var row in level.Rows)
         {
@@ -71,7 +71,7 @@ public class LevelBuilder : MonoBehaviour
 
                 XPosition += 1;
             }
-            YPosition += 1;
+            YPosition -= 1;
             XPosition = RememberedXPosition;
         }
 
