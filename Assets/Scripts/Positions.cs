@@ -14,7 +14,7 @@ namespace Assets.Scripts
     {
         public Positions(Node[] atoms)
         {
-            Atoms = atoms;
+            Atoms = atoms.OrderBy(atom => atom.Name).ToArray();
 
         }
 
@@ -23,7 +23,7 @@ namespace Assets.Scripts
         public int H { get; set; }
         public Node[] Atoms { get; set; }
 
-        public Positions parentPositions;
+        public Positions parentPositions { get; set; }
 
         public int heuristic(Positions goalPosition)
         {
@@ -33,13 +33,16 @@ namespace Assets.Scripts
 
             for (int i = 1; i < Atoms.Length; i++)
             {
-                var distanceX = firstAtom.X - Atoms[i].X;
-                var distanceY = firstAtom.Y - Atoms[i].Y;
+                var distanceX = Atoms[i].X - firstAtom.X;
+                var distanceY = Atoms[i].Y - firstAtom.Y;
 
-                var distanceGoalX = firstGoalAtom.X - goalPosition.Atoms[i].X;
-                var distanceGoalY = firstGoalAtom.Y - goalPosition.Atoms[i].Y;
+                var distanceGoalX = goalPosition.Atoms[i].X - firstGoalAtom.X;
+                var distanceGoalY = goalPosition.Atoms[i].Y - firstGoalAtom.Y;
 
+                //var distance = Math.Abs(firstAtom.X - Atoms[i].X) + Math.Abs(firstAtom.Y - Atoms[i].Y);
+                //var distanceGoal = Math.Abs(firstGoalAtom.X - goalPosition.Atoms[i].X) + Math.Abs(firstGoalAtom.Y - goalPosition.Atoms[i].Y);
                 h += Math.Abs(distanceGoalX - distanceX) + Math.Abs(distanceGoalY - distanceY);
+                //h += Math.Abs(distance - distanceGoal);
             }
 
             return h;
@@ -48,7 +51,6 @@ namespace Assets.Scripts
         public string ToString(List<string> map)
         {
             StringBuilder stringBuilder = new StringBuilder();
-            Debug.Log(map.Count);
             var temp = new string[map.Count];
 
             map.CopyTo(temp);

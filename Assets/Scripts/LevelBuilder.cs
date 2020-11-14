@@ -64,6 +64,7 @@ public class LevelBuilder : MonoBehaviour
                         answerAtoms.Add(atomBuilder);
                         GameObject atom = atomBuilder.Build();
                         atom.tag = "Atom";
+                        
                         atom.transform.position = new Vector3(XPosition, YPosition, 0);
 
                     }

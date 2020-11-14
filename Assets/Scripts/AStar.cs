@@ -25,8 +25,9 @@ namespace Assets.Scripts
             //calculateAStar(start, end);
         }
          
-        public void calculateAStar()
+        public List<Positions> calculateAStar()
         {
+            int tempI = 0;
             startPosition.calculateMovePriority(0, endPosition);
 
             Debug.Log(startPosition.ToString(Map));
@@ -35,14 +36,16 @@ namespace Assets.Scripts
 
             while(openList.Length > 0)
             {
+                tempI++;
+                if (tempI > 2000) return null;
                 var currPositions = openList.Dequeue();
                 closeList.Add(currPositions);
-
+                //Debug.Log($"CurrentPosition \n{currPositions.ToString(Map)}");
                 if (currPositions.compare(endPosition))
                 {
-                    Console.WriteLine("We solved that :)))");
+                    Debug.Log("We solved that :)))");
+                    return calculatePath(currPositions, endPosition);
                 }
-
                 var otherPositions = getOtherPositions(currPositions);
                 Debug.Log("Successfully expanded state");
 
@@ -55,13 +58,14 @@ namespace Assets.Scripts
                     else
                     {
                         var newG = currPositions.G + currPositions.heuristic(nextPositions);
-                        
-                        if(newG < nextPositions.G || !openList.Exists(nextPositions))
+                        var existsInQueue = openList.Exists(nextPositions);
+
+                        if (newG < nextPositions.G || !existsInQueue)
                         {
                             nextPositions.parentPositions = currPositions;
                             nextPositions.calculateMovePriority(newG, endPosition);
 
-                            if (!openList.Exists(nextPositions))
+                            if (!existsInQueue)
                             {
                                 openList.Enqueue(nextPositions);
                             }
@@ -71,35 +75,60 @@ namespace Assets.Scripts
                 }
 
             }
+            return null;
         }
 
         public List<Positions> getOtherPositions(Positions currentPosition)
         {
             var otherPosiblePositions = new List<Positions>();
             var mapWithAtoms = currentPosition.ToList(Map);
-            Debug.Log($"Expanding state \n {currentPosition.ToString(Map)}");
+            //Debug.Log($"Expanding state \n {currentPosition.ToString(Map)}");
 
             foreach (var (atom, i) in currentPosition.Atoms.WithIndex())
             {
                 Vector2 startPos = new Vector2(atom.X, atom.Y);
-                Debug.Log($"start pos {startPos}");
+                //Debug.Log($"start pos {startPos}");
                 foreach (var direction in "UDLR")
                 {
                     var directionVector = MoveFactory.getMovementCoordinates(direction);
-                    Debug.Log($"Direction {direction}, Vector : {directionVector}");
+                    //Debug.Log($"Direction {direction}, Vector : {directionVector}");
                     var newAtom = atom.Move(mapWithAtoms, directionVector);
                     var atoms = (Node[])currentPosition.Atoms.Clone();
-                    Debug.Log($"Atoms Clone Length: {atoms.Length} , i {i}");
+                    //Debug.Log($"Atoms Clone Length: {atoms.Length} , i {i}");
                     atoms[i] = newAtom;
 
                     Positions position = new Positions(atoms);
-                    Debug.Log($"New state \n {position.ToString(Map)}");
+
+                    if (currentPosition.Equals(position)) continue;
+                    //Debug.Log($"New state \n {position.ToString(Map)}");
                     otherPosiblePositions.Add(position);
                     
                 }
             }
 
             return otherPosiblePositions;
+        }
+
+        static List<Positions> calculatePath(Positions current, Positions goal)
+        {
+            var states = new List<Positions>();
+            
+
+            if (current.compare(goal))
+            {
+                while (current != null)
+                {
+                    states.Add(current);
+                    current = current.parentPositions;
+                }
+
+                if (states.Count > 0)
+                {
+                    states.Reverse();
+                }
+            }
+
+            return states;
         }
 
 

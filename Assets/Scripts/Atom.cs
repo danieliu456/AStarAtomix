@@ -8,7 +8,7 @@ using UnityEngine;
 public class Atom : MonoBehaviour
 {
     public GameManager GameManager;
-
+    public int uniqueId;
     public int X;
     public int Y;
 
@@ -104,12 +104,14 @@ public class Node
 {
     public int X { get; set; }
     public int Y { get; set; }
+    public int uniqueId { get; set; }
     public string Name { get; set; }
 
-    public Node(Vector2 vector, string name)
+    public Node(Vector2 vector, string name, int uniqueId)
     {
         X = (int)vector.x;
         Y = (int)vector.y;
+        this.uniqueId = uniqueId;
         Name = name;
     }
 

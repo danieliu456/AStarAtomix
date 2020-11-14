@@ -33,7 +33,6 @@ public class AtomBuilder
 
         GameObject core = GameObject.Instantiate(Core);
         core.name = Id;
-        
 
         GameObject atomBorder = GameObject.Instantiate(AtomBorder, core.transform);
         atomBorder.name = "atomBorder";

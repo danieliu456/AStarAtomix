@@ -94,27 +94,11 @@ public class Element
 
         for (int i = 2; i < s.Length; i++)
         {
-            //string temp = $"{s[i][0]}, {s[i].Substring(1)}";
             string temp = $"{s[i].Substring(1)}";
             Degrees.Add(CalculateDegrees(temp));
         }
     }
 
-    // TODO:
-    // DRAW ALL ELEMENTS
-
-    //public int CalculateDegrees(string character) => character switch
-    //    {
-    //        "U" => 0,
-    //        "R" => 90,
-    //        "D" => 180,
-    //        "L" => 270,
-    //        "RU" => 45,
-    //        "RD" => 135,
-    //        "LD" => 225,
-    //        "LU" => 315,
-    //        _ => throw new ArgumentOutOfRangeException("Could not define degrees for level")
-    //    };
     public int CalculateDegrees(string character)
     {
         switch (character)

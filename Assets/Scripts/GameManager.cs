@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -98,8 +99,9 @@ public class GameManager : MonoBehaviour
         var currentAtoms = FindObjectsOfType<Atom>().Where(a => a.tag == "Atom").ToArray();
         var targetAtoms = FindObjectsOfType<Atom>().Where(a => a.tag == "answer").ToArray();
 
-        Node[] currentNodes = new Node[currentAtoms.Length ];
+        Node[] currentNodes = new Node[currentAtoms.Length];
         Node[] targetNodes = new Node[currentAtoms.Length];
+
         for (int i = 0; i < currentAtoms.Length; i++)
         {
             var postion = currentAtoms[i].transform.position;
@@ -122,7 +124,24 @@ public class GameManager : MonoBehaviour
         List<string> map = mapHelper.convertToEmptyMap();
          
         var AStar = new AStar(currentPositions, goalPositions, map);
-        AStar.calculateAStar();
+        var listOfMoves = AStar.calculateAStar();
+
+        Debug.Log("Printing the path");
+
+        using (StreamWriter outputFile = new StreamWriter("LevelCompletion.txt"))
+        {
+            string Header = $"{listOfMoves.Count } Moves Needed: {DateTime.Now}";
+            outputFile.WriteLine(Header);
+            foreach (var position in listOfMoves)
+            {
+                string positionsInMap = position.ToString(map);
+
+                outputFile.WriteLine(positionsInMap);
+
+                
+            }
+        }
+
 
         //var atomList = FindObjectsOfType<Atom>().Where(a => a.tag == "Atom");
 

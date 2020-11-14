@@ -14,12 +14,6 @@ namespace Assets.Scripts
         private int leftChild(int i) => (i * 2 + 1);
         private int rightChild(int i) => (i * 2 + 2);
 
-        public override bool Equals(object obj)
-        {
-            return base.Equals(obj);
-
-        }
-
         public void Enqueue(Positions positions)
         {
             Queue.Add(positions);
