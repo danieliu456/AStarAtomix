@@ -190,6 +190,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GameManager: {fileID: 0}
+  uniqueId: 0
+  X: 0
+  Y: 0
 --- !u!65 &3424804214054832631
 BoxCollider:
   m_ObjectHideFlags: 0

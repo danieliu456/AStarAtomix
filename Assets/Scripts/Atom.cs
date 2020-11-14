@@ -125,7 +125,7 @@ public class Node
             vector += direction;
         }
 
-        return new Node(vector, Name);
+        return new Node(vector, Name, uniqueId);
     }
     private bool isBlocked(List<string> map, Vector2 direction, Vector2 nodeCoord)
     {

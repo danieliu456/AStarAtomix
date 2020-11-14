@@ -96,8 +96,12 @@ namespace Assets.Scripts
                     var atoms = (Node[])currentPosition.Atoms.Clone();
                     //Debug.Log($"Atoms Clone Length: {atoms.Length} , i {i}");
                     atoms[i] = newAtom;
-
                     Positions position = new Positions(atoms);
+
+                    position.RoundMove = directionVector;
+                    position.MovedNodeuniqueId = atom.uniqueId;
+                    position.MovedAtomName = atom.Name;
+
 
                     if (currentPosition.Equals(position)) continue;
                     //Debug.Log($"New state \n {position.ToString(Map)}");

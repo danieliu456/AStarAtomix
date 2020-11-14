@@ -11,15 +11,17 @@ public class AtomBuilder
     public List<double> Branches = new List<double>();
     public string Id;
     public string name;
+    int uniqueId;
 
     public GameObject TextCanvas;
 
-    public AtomBuilder(string id, List<double> branches, GameObject core, GameObject branch, GameObject textCanvas, GameObject atomBorder, string name)
+    public AtomBuilder(string id, List<double> branches, GameObject core, GameObject branch, GameObject textCanvas, GameObject atomBorder, string name, int uniqueId)
     {
         Core = core;
         Branches = branches;
         Id = id;
         Branch = branch;
+        this.uniqueId = uniqueId;
         TextCanvas = textCanvas;
         AtomBorder = atomBorder;
         this.name = name;
@@ -32,8 +34,8 @@ public class AtomBuilder
         //atomRenderer.color = color;
 
         GameObject core = GameObject.Instantiate(Core);
+        //core.name = Id + "-" +uniqueId.ToString();
         core.name = Id;
-
         GameObject atomBorder = GameObject.Instantiate(AtomBorder, core.transform);
         atomBorder.name = "atomBorder";
         atomBorder.transform.GetComponent<SpriteRenderer>().enabled = false;

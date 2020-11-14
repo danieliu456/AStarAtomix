@@ -37,6 +37,7 @@ public class LevelBuilder : MonoBehaviour
 
     public void Build()
     {
+        int atomUniqueId = 0;
         level = GetComponent<Levels>().gameLevels[CurrentLevel];
         answerAtoms = new List<AtomBuilder>();
 
@@ -60,12 +61,15 @@ public class LevelBuilder : MonoBehaviour
                     Element element = level.Elements.Find(elem => elem.Name == character.ToString());
                     if(element != null)
                     {
-                        var atomBuilder = new AtomBuilder(element.Name, element.Degrees, Core, Branch, TextCanvas, AtomBorder, element.Char);
+                        var atomBuilder = new AtomBuilder(element.Name, element.Degrees, Core, Branch, TextCanvas, AtomBorder, element.Char, atomUniqueId);
                         answerAtoms.Add(atomBuilder);
                         GameObject atom = atomBuilder.Build();
+
                         atom.tag = "Atom";
-                        
+                         
+
                         atom.transform.position = new Vector3(XPosition, YPosition, 0);
+                        atomUniqueId++;
 
                     }
                 }

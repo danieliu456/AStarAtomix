@@ -95,73 +95,80 @@ public class GameManager : MonoBehaviour
 
     IEnumerator AStarCoroutine()
     {
-        Debug.Log("Starting A* calculation");
-        var currentAtoms = FindObjectsOfType<Atom>().Where(a => a.tag == "Atom").ToArray();
-        var targetAtoms = FindObjectsOfType<Atom>().Where(a => a.tag == "answer").ToArray();
-
-        Node[] currentNodes = new Node[currentAtoms.Length];
-        Node[] targetNodes = new Node[currentAtoms.Length];
-
-        for (int i = 0; i < currentAtoms.Length; i++)
+        try
         {
-            var postion = currentAtoms[i].transform.position;
-            var newPosition = convertFromVectorToArrayIndex(postion);
-            var vector = new Vector2(newPosition[0], newPosition[1]);
-            var name = currentAtoms[i].name;
+            Debug.Log("Starting A* calculation");
+            var currentAtoms = FindObjectsOfType<Atom>().Where(a => a.tag == "Atom").ToArray();
+            var targetAtoms = FindObjectsOfType<Atom>().Where(a => a.tag == "answer").ToArray();
 
-            var targetPostion = targetAtoms[i].transform.position;
-            var targetName = targetAtoms[i].name;
+            Node[] currentNodes = new Node[currentAtoms.Length];
+            Node[] targetNodes = new Node[currentAtoms.Length];
 
-            currentNodes[i] = new Node(vector, name);
-            targetNodes[i] = new Node(targetPostion, targetName);
-        }
-
-        
-        var currentPositions = new Positions(currentNodes);
-        var goalPositions = new Positions(targetNodes);
-        MapHelper mapHelper = new MapHelper(LevelBuilder.level.Rows, LevelBuilder.level.Answer);
-
-        List<string> map = mapHelper.convertToEmptyMap();
-         
-        var AStar = new AStar(currentPositions, goalPositions, map);
-        var listOfMoves = AStar.calculateAStar();
-
-        Debug.Log("Printing the path");
-
-        using (StreamWriter outputFile = new StreamWriter("LevelCompletion.txt"))
-        {
-            string Header = $"{listOfMoves.Count } Moves Needed: {DateTime.Now}";
-            outputFile.WriteLine(Header);
-            foreach (var position in listOfMoves)
+            for (int i = 0; i < currentAtoms.Length; i++)
             {
-                string positionsInMap = position.ToString(map);
+                var postion = currentAtoms[i].transform.position;
+                var newPosition = convertFromVectorToArrayIndex(postion);
+                var vector = new Vector2(newPosition[0], newPosition[1]);
+                var name = currentAtoms[i].name;
 
-                outputFile.WriteLine(positionsInMap);
+                var targetPostion = targetAtoms[i].transform.position;
+                var targetName = targetAtoms[i].name;
 
-                
+
+                currentNodes[i] = new Node(vector, name, 1);
+                targetNodes[i] = new Node(targetPostion, targetName, 99);
             }
+
+ 
+            var currentPositions = new Positions(currentNodes);
+            var goalPositions = new Positions(targetNodes);
+            MapHelper mapHelper = new MapHelper(LevelBuilder.level.Rows, LevelBuilder.level.Answer);
+
+            List<string> map = mapHelper.convertToEmptyMap();
+         
+            var AStar = new AStar(currentPositions, goalPositions, map);
+            var listOfMoves = AStar.calculateAStar();
+
+            Debug.Log("Printing the path");
+
+            using (StreamWriter outputFile = new StreamWriter("LevelCompletion.txt"))
+            {
+                string Header = $"{listOfMoves.Count } Moves Needed: {DateTime.Now}";
+                outputFile.WriteLine(Header);
+                foreach (var position in listOfMoves)
+                {
+                    string positionsInMap = position.ToString(map);
+
+                    outputFile.WriteLine(positionsInMap);
+                }
+            }
+
+
+            //var atomList = FindObjectsOfType<Atom>().Where(a => a.tag == "Atom");
+
+            //foreach (var atom in atomList)
+            //{
+            //    foreach (var item in "UDLR")
+            //    {
+            //        setMainAtom(atom);
+            //        atom.Move(item.getMovementCordinates());
+            //        NextLevelButton.SetActive(CheckIfLevelCompleted());
+
+            //        yield return new WaitForSeconds(0.5f);
+            //    }
+            //}
         }
-
-
-        //var atomList = FindObjectsOfType<Atom>().Where(a => a.tag == "Atom");
-
-        //foreach (var atom in atomList)
-        //{
-        //    foreach (var item in "UDLR")
-        //    {
-        //        setMainAtom(atom);
-        //        atom.Move(item.getMovementCordinates());
-        //        NextLevelButton.SetActive(CheckIfLevelCompleted());
-
-        //        yield return new WaitForSeconds(0.5f);
-        //    }
-        //}
+        catch (Exception e)
+        {
+            Debug.LogError(e);
+        }
         yield return new WaitForSeconds(0.5f);
+
     }
 
     private bool CheckIfLevelCompleted()
     {
-        var atomList = FindObjectsOfType<Atom>().Where(a => a.tag == "Atom");
+        var atomList = FindObjectsOfType<Atom>().Where(a => a.tag == "Atom" );
         List<string> answer = LevelBuilder.level.Answer;
         int y = 0, x = 0, rememberedXPosition=0, error = 0;
         bool first = true;

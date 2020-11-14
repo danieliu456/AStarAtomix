@@ -17,7 +17,9 @@ namespace Assets.Scripts
             Atoms = atoms.OrderBy(atom => atom.Name).ToArray();
 
         }
-
+        public int MovedNodeuniqueId { get; set; }
+        public string MovedAtomName { get; set; }
+        public Vector2 RoundMove { get; set; }
         public int F { get; set; }
         public int G { get; set; }
         public int H { get; set; }
@@ -76,6 +78,7 @@ namespace Assets.Scripts
             }
 
             stringBuilder.AppendLine($"F: {F}  G: {G}  H: {H}");
+            stringBuilder.AppendLine($"Moved Atom: {MovedAtomName}  MovedAtomId: {MovedNodeuniqueId}  Vector: {RoundMove}");
 
             return stringBuilder.ToString();
         }
