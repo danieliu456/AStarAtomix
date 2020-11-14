@@ -37,7 +37,7 @@ namespace Assets.Scripts
             while(openList.Length > 0)
             {
                 tempI++;
-                if (tempI > 2000) return null;
+                if (tempI > 5000) return null;
                 var currPositions = openList.Dequeue();
                 closeList.Add(currPositions);
                 //Debug.Log($"CurrentPosition \n{currPositions.ToString(Map)}");

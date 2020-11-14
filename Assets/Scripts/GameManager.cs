@@ -135,6 +135,7 @@ public class GameManager : MonoBehaviour
 
             using (StreamWriter outputFile = new StreamWriter("LevelCompletion.txt"))
             {
+                outputFile.WriteLine("------------FINISH------------");
                 string Header = $"{listOfMoves.Count } Moves Needed: {DateTime.Now}";
                 outputFile.WriteLine(Header);
                 foreach (var position in listOfMoves)
@@ -174,6 +175,7 @@ public class GameManager : MonoBehaviour
             var atomToMove = atomList.Where(a => a.name.Contains(":" + position.MovedNodeuniqueId)).First();
             setMainAtom(atomToMove);
             atomToMove.Move(position.RoundMove);
+            NextLevelButton.SetActive(CheckIfLevelCompleted());
             yield return new WaitForSeconds(0.5f);
         }
 
