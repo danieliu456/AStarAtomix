@@ -98,6 +98,8 @@ namespace Assets.Scripts
                     atoms[i] = newAtom;
                     Positions position = new Positions(atoms);
 
+                    directionVector = new Vector2(directionVector.x, directionVector.y * - 1);
+
                     position.RoundMove = directionVector;
                     position.MovedNodeuniqueId = atom.uniqueId;
                     position.MovedAtomName = atom.Name;

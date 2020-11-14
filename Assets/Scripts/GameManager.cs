@@ -95,6 +95,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator AStarCoroutine()
     {
+        List<Positions> listOfMoves = new List<Positions>();
         try
         {
             Debug.Log("Starting A* calculation");
@@ -128,7 +129,7 @@ public class GameManager : MonoBehaviour
             List<string> map = mapHelper.convertToEmptyMap();
          
             var AStar = new AStar(currentPositions, goalPositions, map);
-            var listOfMoves = AStar.calculateAStar();
+            listOfMoves = AStar.calculateAStar();
 
             Debug.Log("Printing the path");
 
@@ -163,6 +164,19 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogError(e);
         }
+
+
+
+        foreach (var position in listOfMoves)
+        {
+            var atomList = FindObjectsOfType<Atom>().Where(a => a.tag == "Atom");
+
+            var atomToMove = atomList.Where(a => a.name.Contains(":" + position.MovedNodeuniqueId)).First();
+            setMainAtom(atomToMove);
+            atomToMove.Move(position.RoundMove);
+            yield return new WaitForSeconds(0.5f);
+        }
+
         yield return new WaitForSeconds(0.5f);
 
     }
