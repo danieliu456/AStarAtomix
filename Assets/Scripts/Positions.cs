@@ -61,7 +61,7 @@ namespace Assets.Scripts
             {
                 try
                 {
-                    temp[atom.Y] = temp[atom.Y].Remove(atom.X, 1).Insert(atom.X, atom.Name);
+                    temp[atom.Y] = temp[atom.Y].Remove(atom.X, 1).Insert(atom.X, atom.Name[0].ToString());
                 }
                 catch (Exception e)
                 {
@@ -95,7 +95,7 @@ namespace Assets.Scripts
                 {
                     try
                     {
-                        temp[atom.Y] = temp[atom.Y].Remove(atom.X, 1).Insert(atom.X, atom.Name);
+                        temp[atom.Y] = temp[atom.Y].Remove(atom.X, 1).Insert(atom.X, atom.Name[0].ToString());
                     }
                     catch (Exception e)
                     {

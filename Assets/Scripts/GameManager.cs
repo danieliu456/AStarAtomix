@@ -109,13 +109,14 @@ public class GameManager : MonoBehaviour
                 var postion = currentAtoms[i].transform.position;
                 var newPosition = convertFromVectorToArrayIndex(postion);
                 var vector = new Vector2(newPosition[0], newPosition[1]);
-                var name = currentAtoms[i].name;
+                var name = currentAtoms[i].name[0].ToString();
 
                 var targetPostion = targetAtoms[i].transform.position;
-                var targetName = targetAtoms[i].name;
+                var targetName = targetAtoms[i].name[0].ToString();
 
+                var atomsArgs = currentAtoms[i].name.Split(':');
 
-                currentNodes[i] = new Node(vector, name, 1);
+                currentNodes[i] = new Node(vector, name, Int32.Parse(atomsArgs[1]));
                 targetNodes[i] = new Node(targetPostion, targetName, 99);
             }
 
@@ -182,7 +183,7 @@ public class GameManager : MonoBehaviour
                 {
                     if (first)
                     {
-                        var atoms = atomList.Where(a => a.name == character.ToString());
+                        var atoms = atomList.Where(a => a.name.Contains(character.ToString()+ ":"));
                         var firstAtom = findFirstAnswerAtom(atoms);
                         x = Convert.ToInt32(firstAtom.x);
                         y = Convert.ToInt32(firstAtom.y);
@@ -191,7 +192,7 @@ public class GameManager : MonoBehaviour
                         rememberedXPosition = x - error;
                     } else
                     {
-                        var atoms = atomList.Where(a => a.name == character.ToString());
+                        var atoms = atomList.Where(a => a.name.Contains(character.ToString() + ":"));
                         if (anyOfItemsIsInCorrectPossition(atoms, x, y)) {
                             Debug.Log($"Nice {atoms.First().name}");
                         }

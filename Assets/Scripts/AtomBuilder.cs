@@ -35,7 +35,7 @@ public class AtomBuilder
 
         GameObject core = GameObject.Instantiate(Core);
         //core.name = Id + "-" +uniqueId.ToString();
-        core.name = Id;
+        core.name = Id+ ":" + uniqueId.ToString();
         GameObject atomBorder = GameObject.Instantiate(AtomBorder, core.transform);
         atomBorder.name = "atomBorder";
         atomBorder.transform.GetComponent<SpriteRenderer>().enabled = false;
