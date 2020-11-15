@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -41,36 +42,77 @@ namespace Assets.Scripts
                 var currPositions = openList.Dequeue();
                 closeList.Add(currPositions);
                 //Debug.Log($"CurrentPosition \n{currPositions.ToString(Map)}");
+
+                using (StreamWriter outputFile = File.AppendText("LevelCompletion.txt"))
+                {
+                    outputFile.WriteLine("------------MinPriority------------");
+                    string positionsInMap = currPositions.ToString(Map);
+                    outputFile.WriteLine(positionsInMap);
+                }
+
                 if (currPositions.compare(endPosition))
                 {
                     Debug.Log("We solved that :)))");
                     return calculatePath(currPositions, endPosition);
                 }
                 var otherPositions = getOtherPositions(currPositions);
-                Debug.Log("Successfully expanded state");
 
-                foreach (var (nextPositions, index) in otherPositions.WithIndex())
+                foreach (var (neighbour, index) in otherPositions.WithIndex())
                 {
-                    if (closeList.Contains(nextPositions))
+                    var neighbourCostG = currPositions.G + 1;
+                    var neighbourExistInOpen = openList.Exists(neighbour);
+                    var neighbourExistsInCloseList = closeList.Contains(neighbour);
+
+
+                    if (neighbourExistInOpen)
                     {
-                        Debug.Log("Already have this state :)");
+                        if (neighbour.G <= neighbourCostG)
+                        {
+                            continue;
+                        }
+                    } 
+                    else if (neighbourExistsInCloseList) 
+                    {
+                        if (neighbour.G <= neighbourCostG)
+                        {
+                            continue;
+                        }
+
+                        closeList.Remove(neighbour);
+                        neighbour.parentPositions = currPositions;
+                        neighbour.calculateMovePriority(neighbourCostG, endPosition);
+                        openList.Enqueue(neighbour);
                     }
                     else
                     {
-                        var newG = currPositions.G + currPositions.heuristic(nextPositions);
-                        var existsInQueue = openList.Exists(nextPositions);
-
-                        if (newG < nextPositions.G || !existsInQueue)
-                        {
-                            nextPositions.parentPositions = currPositions;
-                            nextPositions.calculateMovePriority(newG, endPosition);
-
-                            if (!existsInQueue)
-                            {
-                                openList.Enqueue(nextPositions);
-                            }
-                        }
+                        neighbour.parentPositions = currPositions;
+                        neighbour.calculateMovePriority(neighbourCostG, endPosition);
+                        openList.Enqueue(neighbour);
                     }
+
+
+
+
+                    //if (closeList.Contains(nextPositions))
+                    //{
+                    //    Debug.Log("Already have this state :)");
+                    //}
+                    //else
+                    //{
+                    //    var newG = currPositions.G + currPositions.heuristic(nextPositions);
+                    //    var existsInQueue = openList.Exists(nextPositions);
+
+                    //    if (newG < nextPositions.G || !existsInQueue)
+                    //    {
+                    //        nextPositions.parentPositions = currPositions;
+                    //        nextPositions.calculateMovePriority(newG, endPosition);
+
+                    //        if (!existsInQueue)
+                    //        {
+                    //            openList.Enqueue(nextPositions);
+                    //        }
+                    //    }
+                    //}
 
                 }
 
@@ -83,6 +125,8 @@ namespace Assets.Scripts
             var otherPosiblePositions = new List<Positions>();
             var mapWithAtoms = currentPosition.ToList(Map);
             //Debug.Log($"Expanding state \n {currentPosition.ToString(Map)}");
+
+
 
             foreach (var (atom, i) in currentPosition.Atoms.WithIndex())
             {
@@ -99,7 +143,7 @@ namespace Assets.Scripts
                     Positions position = new Positions(atoms);
 
                     directionVector = new Vector2(directionVector.x, directionVector.y * - 1);
-
+                    position.G = currentPosition.G + 1;
                     position.RoundMove = directionVector;
                     position.MovedNodeuniqueId = atom.uniqueId;
                     position.MovedAtomName = atom.Name;
@@ -107,6 +151,14 @@ namespace Assets.Scripts
 
                     if (currentPosition.Equals(position)) continue;
                     //Debug.Log($"New state \n {position.ToString(Map)}");
+
+                    using (StreamWriter outputFile = File.AppendText("LevelCompletion.txt"))
+                    {
+                        outputFile.WriteLine("------------Expanding------------");
+                        string positionsInMap = position.ToString(Map);
+                        outputFile.WriteLine(positionsInMap);
+                    }
+
                     otherPosiblePositions.Add(position);
                     
                 }

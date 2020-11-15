@@ -95,7 +95,13 @@ public class GameManager : MonoBehaviour
 
     IEnumerator AStarCoroutine()
     {
+
+        using (StreamWriter outputFile = new StreamWriter("LevelCompletion.txt"))
+        {
+            outputFile.WriteLine("Starting A* Process");
+        }
         List<Positions> listOfMoves = new List<Positions>();
+
         try
         {
             Debug.Log("Starting A* calculation");
@@ -133,7 +139,7 @@ public class GameManager : MonoBehaviour
 
             Debug.Log("Printing the path");
 
-            using (StreamWriter outputFile = new StreamWriter("LevelCompletion.txt"))
+            using (StreamWriter outputFile = File.AppendText("LevelCompletion.txt"))
             {
                 outputFile.WriteLine("------------FINISH------------");
                 string Header = $"{listOfMoves.Count } Moves Needed: {DateTime.Now}";
@@ -166,7 +172,7 @@ public class GameManager : MonoBehaviour
             Debug.LogError(e);
         }
 
-
+        if (listOfMoves == null) yield break; ;
 
         foreach (var position in listOfMoves)
         {
