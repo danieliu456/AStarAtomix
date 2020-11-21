@@ -15,12 +15,15 @@ namespace Assets.Scripts
         PositionsPriorityQueue openList = new PositionsPriorityQueue();
         HashSet<Positions> closeList = new HashSet<Positions>();
         public List<string> Map = new List<string>();
+        private readonly bool log;
+        StreamWriter outputFile = File.AppendText("LevelCompletion.txt");
 
         public List<Positions> Positions { get; set; }
 
-        public AStar(Positions start, Positions end, List<string> map)
+        public AStar(Positions start, Positions end, List<string> map, bool log)
         {
             Map = map;
+            this.log = log;
             startPosition = start;
             endPosition = end;
             //calculateAStar(start, end);
@@ -43,16 +46,18 @@ namespace Assets.Scripts
                 closeList.Add(currPositions);
                 //Debug.Log($"CurrentPosition \n{currPositions.ToString(Map)}");
 
-                using (StreamWriter outputFile = File.AppendText("LevelCompletion.txt"))
+                if(log)
                 {
-                    outputFile.WriteLine("------------MinPriority------------");
-                    string positionsInMap = currPositions.ToString(Map);
-                    outputFile.WriteLine(positionsInMap);
+                        outputFile.WriteLine("------------MinPriority------------");
+                        string positionsInMap = currPositions.ToString(Map);
+                        outputFile.WriteLine(positionsInMap);
                 }
+
 
                 if (currPositions.compare(endPosition))
                 {
                     Debug.Log("We solved that :)))");
+                    outputFile.Dispose();
                     return calculatePath(currPositions, endPosition);
                 }
                 var otherPositions = getOtherPositions(currPositions);
@@ -117,6 +122,7 @@ namespace Assets.Scripts
                 }
 
             }
+            outputFile.Dispose();
             return null;
         }
 
@@ -152,11 +158,12 @@ namespace Assets.Scripts
                     if (currentPosition.Equals(position)) continue;
                     //Debug.Log($"New state \n {position.ToString(Map)}");
 
-                    using (StreamWriter outputFile = File.AppendText("LevelCompletion.txt"))
+                    if (log)
                     {
-                        outputFile.WriteLine("------------Expanding------------");
-                        string positionsInMap = position.ToString(Map);
-                        outputFile.WriteLine(positionsInMap);
+                            outputFile.WriteLine("------------Expanding------------");
+                            string positionsInMap = position.ToString(Map);
+                            outputFile.WriteLine(positionsInMap);
+                        
                     }
 
                     otherPosiblePositions.Add(position);

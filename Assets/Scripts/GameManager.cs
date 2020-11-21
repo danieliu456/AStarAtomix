@@ -93,7 +93,12 @@ public class GameManager : MonoBehaviour
         StartCoroutine(AStarCoroutine());
     }
 
-    IEnumerator AStarCoroutine()
+    public void CalculateAStarWithLog()
+    {
+        StartCoroutine(AStarCoroutine(true));
+    }
+
+    IEnumerator AStarCoroutine(bool log = false)
     {
 
         using (StreamWriter outputFile = new StreamWriter("LevelCompletion.txt"))
@@ -134,23 +139,28 @@ public class GameManager : MonoBehaviour
 
             List<string> map = mapHelper.convertToEmptyMap();
          
-            var AStar = new AStar(currentPositions, goalPositions, map);
+            var AStar = new AStar(currentPositions, goalPositions, map, log);
             listOfMoves = AStar.calculateAStar();
 
             Debug.Log("Printing the path");
 
-            using (StreamWriter outputFile = File.AppendText("LevelCompletion.txt"))
+            if (log)
             {
-                outputFile.WriteLine("------------FINISH------------");
-                string Header = $"{listOfMoves.Count } Moves Needed: {DateTime.Now}";
-                outputFile.WriteLine(Header);
-                foreach (var position in listOfMoves)
+                using (StreamWriter outputFile = File.AppendText("LevelCompletion.txt"))
                 {
-                    string positionsInMap = position.ToString(map);
+                    outputFile.WriteLine("------------FINISH------------");
+                    string Header = $"{listOfMoves.Count } Moves Needed: {DateTime.Now}";
+                    outputFile.WriteLine(Header);
+                    foreach (var position in listOfMoves)
+                    {
+                        string positionsInMap = position.ToString(map);
 
-                    outputFile.WriteLine(positionsInMap);
+                        outputFile.WriteLine(positionsInMap);
+                    }
                 }
             }
+
+
 
 
             //var atomList = FindObjectsOfType<Atom>().Where(a => a.tag == "Atom");
