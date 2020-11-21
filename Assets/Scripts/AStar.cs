@@ -41,7 +41,11 @@ namespace Assets.Scripts
             while(openList.Length > 0)
             {
                 tempI++;
-                if (tempI > 5000) return null;
+                if (tempI > 5000) {
+                    Debug.Log($"Could not found solution in {tempI} tries");
+                    outputFile.Dispose();
+                    return null;
+                 }
                 var currPositions = openList.Dequeue();
                 closeList.Add(currPositions);
                 //Debug.Log($"CurrentPosition \n{currPositions.ToString(Map)}");
@@ -122,6 +126,7 @@ namespace Assets.Scripts
                 }
 
             }
+            Debug.Log($"Could not found solution Open List Empty");
             outputFile.Dispose();
             return null;
         }

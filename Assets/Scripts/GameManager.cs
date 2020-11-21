@@ -124,12 +124,14 @@ public class GameManager : MonoBehaviour
                 var name = currentAtoms[i].name[0].ToString();
 
                 var targetPostion = targetAtoms[i].transform.position;
+                var newTargetPosition = convertFromVectorToArrayIndex(targetPostion);
+                var targetVector = new Vector2(newTargetPosition[0], newTargetPosition[1]);
                 var targetName = targetAtoms[i].name[0].ToString();
 
                 var atomsArgs = currentAtoms[i].name.Split(':');
 
                 currentNodes[i] = new Node(vector, name, Int32.Parse(atomsArgs[1]));
-                targetNodes[i] = new Node(targetPostion, targetName, 99);
+                targetNodes[i] = new Node(targetVector, targetName, 99);
             }
 
  
@@ -149,6 +151,7 @@ public class GameManager : MonoBehaviour
                 using (StreamWriter outputFile = File.AppendText("LevelCompletion.txt"))
                 {
                     outputFile.WriteLine("------------FINISH------------");
+
                     string Header = $"{listOfMoves.Count } Moves Needed: {DateTime.Now}";
                     outputFile.WriteLine(Header);
                     foreach (var position in listOfMoves)
