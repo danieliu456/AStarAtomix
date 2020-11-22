@@ -97,49 +97,6 @@ namespace Assets.Scripts
                             openList.Enqueue(neighbour);
                         }
                     }
-                    //else if (neighbourExistsInCloseList) 
-                    //{
-                    //    if (neighbour.G <= neighbourCostG)
-                    //    {
-                    //        continue;
-                    //    }
-
-                    //    closeList.Remove(neighbour);
-                    //    neighbour.parentPositions = currPositions;
-                    //    neighbour.calculateMovePriority(neighbourCostG, endPosition);
-                    //    openList.Enqueue(neighbour);
-                    //}
-                    //else
-                    //{
-                    //    neighbour.parentPositions = currPositions;
-                    //    neighbour.calculateMovePriority(neighbourCostG, endPosition);
-                    //    openList.Enqueue(neighbour);
-                    //}
-
-
-
-
-                    //if (closeList.Contains(nextPositions))
-                    //{
-                    //    Debug.Log("Already have this state :)");
-                    //}
-                    //else
-                    //{
-                    //    var newG = currPositions.G + currPositions.heuristic(nextPositions);
-                    //    var existsInQueue = openList.Exists(nextPositions);
-
-                    //    if (newG < nextPositions.G || !existsInQueue)
-                    //    {
-                    //        nextPositions.parentPositions = currPositions;
-                    //        nextPositions.calculateMovePriority(newG, endPosition);
-
-                    //        if (!existsInQueue)
-                    //        {
-                    //            openList.Enqueue(nextPositions);
-                    //        }
-                    //    }
-                    //}
-
                 }
 
             }
