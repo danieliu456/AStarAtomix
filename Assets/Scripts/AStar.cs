@@ -69,35 +69,52 @@ namespace Assets.Scripts
                 foreach (var (neighbour, index) in otherPositions.WithIndex())
                 {
                     var neighbourCostG = currPositions.G + 1;
-                    var neighbourExistInOpen = openList.Exists(neighbour);
+                    var neighbourInOpen = openList.Exists(neighbour);
                     var neighbourExistsInCloseList = closeList.Contains(neighbour);
 
+                    neighbour.calculateMovePriority(neighbourCostG, endPosition);
+                    neighbour.parentPositions = currPositions;
 
-                    if (neighbourExistInOpen)
+                    if (neighbourInOpen != null)
                     {
-                        if (neighbour.G <= neighbourCostG)
+                        if (neighbourCostG < neighbourInOpen.G  )
                         {
-                            continue;
+                            openList.UpdatePriority(neighbour);
                         }
                     } 
-                    else if (neighbourExistsInCloseList) 
-                    {
-                        if (neighbour.G <= neighbourCostG)
-                        {
-                            continue;
-                        }
-
-                        closeList.Remove(neighbour);
-                        neighbour.parentPositions = currPositions;
-                        neighbour.calculateMovePriority(neighbourCostG, endPosition);
-                        openList.Enqueue(neighbour);
-                    }
                     else
                     {
-                        neighbour.parentPositions = currPositions;
-                        neighbour.calculateMovePriority(neighbourCostG, endPosition);
-                        openList.Enqueue(neighbour);
+                        if (neighbourExistsInCloseList)
+                        {
+                            if (neighbourCostG < closeList.Where(curr => curr.Equals(neighbour)).First().G)
+                            {
+                                closeList.Remove(neighbour);
+                                openList.Enqueue(neighbour);
+                            }
+                        }
+                        else
+                        {
+                            openList.Enqueue(neighbour);
+                        }
                     }
+                    //else if (neighbourExistsInCloseList) 
+                    //{
+                    //    if (neighbour.G <= neighbourCostG)
+                    //    {
+                    //        continue;
+                    //    }
+
+                    //    closeList.Remove(neighbour);
+                    //    neighbour.parentPositions = currPositions;
+                    //    neighbour.calculateMovePriority(neighbourCostG, endPosition);
+                    //    openList.Enqueue(neighbour);
+                    //}
+                    //else
+                    //{
+                    //    neighbour.parentPositions = currPositions;
+                    //    neighbour.calculateMovePriority(neighbourCostG, endPosition);
+                    //    openList.Enqueue(neighbour);
+                    //}
 
 
 

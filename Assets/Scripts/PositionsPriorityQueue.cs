@@ -72,13 +72,26 @@ namespace Assets.Scripts
             Queue[source] = temporary;
         }
 
-        public bool Exists(Positions obj) {
+        public void UpdatePriority(Positions positions)
+        {
+            for (int i = 0; i < Queue.Count; i++)
+            {
+                if (positions.Equals(Queue[i]))
+                {
+                    Queue[i] = positions;
+                    BuildMinHeap(i);
+                    MinHeapify(i);
+                }
+            }
+        }
+
+        public Positions Exists(Positions obj) {
             foreach (var position in Queue)
             {
                 if (position.Equals(obj))
-                    return true;
+                    return position;
             }
-            return false;
+            return null;
         }
     }
 }
