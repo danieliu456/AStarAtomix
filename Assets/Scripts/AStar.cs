@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,7 +14,9 @@ namespace Assets.Scripts
         Positions startPosition { get; set; }
         Positions endPosition { get; set; }
         PositionsPriorityQueue openList = new PositionsPriorityQueue();
-        HashSet<Positions> closeList = new HashSet<Positions>();
+        //HashSet<Positions> closeList = new HashSet<Positions>();
+        //Hashtable closeList = new Hashtable();
+        Dictionary<int, List<Positions>> closeList = new Dictionary<int, List<Positions>>();
         public List<string> Map = new List<string>();
         private readonly bool log;
         StreamWriter outputFile = File.AppendText("LevelCompletion.txt");
@@ -47,7 +50,30 @@ namespace Assets.Scripts
                     return null;
                  }
                 var currPositions = openList.Dequeue();
-                closeList.Add(currPositions);
+
+                //try
+                //{
+                if (closeList.ContainsKey(currPositions.GetHashCode()))
+                {
+                    closeList[currPositions.GetHashCode()].Add(currPositions);
+                }
+                else
+                {
+                    var list = new List<Positions>();
+                    list.Add(currPositions);
+                    closeList.Add(currPositions.GetHashCode(), list);
+                }
+                
+                
+                //}
+                //catch(Exception e)
+                //{
+                //    Debug.Log("Already exists-------");
+                //    Debug.Log(currPositions.GetHashCode());
+                //    Debug.Log((closeList[currPositions.GetHashCode()] as Positions).ToString(Map));
+                //    Debug.Log(currPositions.ToString(Map));
+
+                //}
                 //Debug.Log($"CurrentPosition \n{currPositions.ToString(Map)}");
 
                 if(log)
@@ -69,8 +95,9 @@ namespace Assets.Scripts
                 foreach (var (neighbour, index) in otherPositions.WithIndex())
                 {
                     var neighbourCostG = currPositions.G + 1;
+
                     var neighbourInOpen = openList.Exists(neighbour);
-                    var neighbourExistsInCloseList = closeList.Contains(neighbour);
+                    var neighbourInClose = closeList.TryGetValue(neighbour.GetHashCode(), out var closedHashedList) ? closedHashedList.Find(e => e.Equals(neighbour)) : null;
 
                     neighbour.calculateMovePriority(neighbourCostG, endPosition);
                     neighbour.parentPositions = currPositions;
@@ -84,11 +111,11 @@ namespace Assets.Scripts
                     } 
                     else
                     {
-                        if (neighbourExistsInCloseList)
+                        if (neighbourInClose != null)
                         {
-                            if (neighbourCostG < closeList.Where(curr => curr.Equals(neighbour)).First().G)
+                            if (neighbourCostG < neighbourInClose.G)
                             {
-                                closeList.Remove(neighbour);
+                                closeList[neighbour.GetHashCode()].Remove(neighbour);
                                 openList.Enqueue(neighbour);
                             }
                         }
