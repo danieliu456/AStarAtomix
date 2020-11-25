@@ -35,7 +35,7 @@ namespace Assets.Scripts
         public List<Positions> calculateAStar()
         {
             int tempI = 0;
-            startPosition.calculateMovePriority(0, endPosition);
+            startPosition.calculateMovePriority(0, endPosition, Map);
 
             Debug.Log(startPosition.ToString(Map));
 
@@ -44,15 +44,14 @@ namespace Assets.Scripts
             while(openList.Length > 0)
             {
                 tempI++;
-                if (tempI > 5000) {
+                if (tempI > 3000) {
                     Debug.Log($"Could not found solution in {tempI} tries");
+                    outputFile.Flush();
                     outputFile.Dispose();
                     return null;
                  }
                 var currPositions = openList.Dequeue();
 
-                //try
-                //{
                 if (closeList.ContainsKey(currPositions.GetHashCode()))
                 {
                     closeList[currPositions.GetHashCode()].Add(currPositions);
@@ -63,18 +62,6 @@ namespace Assets.Scripts
                     list.Add(currPositions);
                     closeList.Add(currPositions.GetHashCode(), list);
                 }
-                
-                
-                //}
-                //catch(Exception e)
-                //{
-                //    Debug.Log("Already exists-------");
-                //    Debug.Log(currPositions.GetHashCode());
-                //    Debug.Log((closeList[currPositions.GetHashCode()] as Positions).ToString(Map));
-                //    Debug.Log(currPositions.ToString(Map));
-
-                //}
-                //Debug.Log($"CurrentPosition \n{currPositions.ToString(Map)}");
 
                 if(log)
                 {
@@ -87,6 +74,7 @@ namespace Assets.Scripts
                 if (currPositions.compare(endPosition))
                 {
                     Debug.Log("We solved that :)))");
+                    outputFile.Flush();
                     outputFile.Dispose();
                     return calculatePath(currPositions, endPosition);
                 }
@@ -99,8 +87,16 @@ namespace Assets.Scripts
                     var neighbourInOpen = openList.Exists(neighbour);
                     var neighbourInClose = closeList.TryGetValue(neighbour.GetHashCode(), out var closedHashedList) ? closedHashedList.Find(e => e.Equals(neighbour)) : null;
 
-                    neighbour.calculateMovePriority(neighbourCostG, endPosition);
+                    neighbour.calculateMovePriority(neighbourCostG, endPosition, Map);
                     neighbour.parentPositions = currPositions;
+
+                    if (log)
+                    {
+                        outputFile.WriteLine("------------Expanding------------");
+                        string positionsInMap = neighbour.ToString(Map);
+                        outputFile.WriteLine(positionsInMap);
+
+                    }
 
                     if (neighbourInOpen != null)
                     {
@@ -128,6 +124,7 @@ namespace Assets.Scripts
 
             }
             Debug.Log($"Could not found solution Open List Empty");
+            outputFile.Flush();
             outputFile.Dispose();
             return null;
         }
@@ -162,15 +159,6 @@ namespace Assets.Scripts
 
 
                     if (currentPosition.Equals(position)) continue;
-                    //Debug.Log($"New state \n {position.ToString(Map)}");
-
-                    if (log)
-                    {
-                            outputFile.WriteLine("------------Expanding------------");
-                            string positionsInMap = position.ToString(Map);
-                            outputFile.WriteLine(positionsInMap);
-                        
-                    }
 
                     otherPosiblePositions.Add(position);
                     

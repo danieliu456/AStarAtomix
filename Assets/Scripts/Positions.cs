@@ -23,16 +23,19 @@ namespace Assets.Scripts
         public int F { get; set; }
         public int G { get; set; }
         public int H { get; set; }
+        public int Side { get; set; } = 0;
+        public int Fit { get; set; } = 0;
         public Node[] Atoms { get; set; }
 
         public Positions parentPositions { get; set; }
 
-        public int heuristic(Positions goalPosition)
+        public int heuristic(Positions goalPosition, List<string> map)
         {
             int h = 0;
             Node firstAtom = Atoms[0];
             Node firstGoalAtom = goalPosition.Atoms[0];
 
+            // Manhattan Distance between atoms
             for (int i = 1; i < Atoms.Length; i++)
             {
                 var distanceX = Atoms[i].X - firstAtom.X;
@@ -41,10 +44,72 @@ namespace Assets.Scripts
                 var distanceGoalX = goalPosition.Atoms[i].X - firstGoalAtom.X;
                 var distanceGoalY = goalPosition.Atoms[i].Y - firstGoalAtom.Y;
 
-                //var distance = Math.Abs(firstAtom.X - Atoms[i].X) + Math.Abs(firstAtom.Y - Atoms[i].Y);
-                //var distanceGoal = Math.Abs(firstGoalAtom.X - goalPosition.Atoms[i].X) + Math.Abs(firstGoalAtom.Y - goalPosition.Atoms[i].Y);
                 h += Math.Abs(distanceGoalX - distanceX) + Math.Abs(distanceGoalY - distanceY);
-                //h += Math.Abs(distance - distanceGoal);
+            }
+
+            // Atoms side 
+            var mid = Atoms.Length / 2;
+            Node MidAtom = Atoms[mid];
+            Node MidGoalAtom = goalPosition.Atoms[mid];
+            for (int i = 0; i < Atoms.Length; i++)
+            {
+                if (i == mid) continue;
+
+                var distanceX = MidAtom.X - Atoms[i].X;
+                var distanceY = MidAtom.Y - Atoms[i].Y;
+
+                var distanceGoalX = MidGoalAtom.X - goalPosition.Atoms[i].X;
+                var distanceGoalY = MidGoalAtom.Y - goalPosition.Atoms[i].Y;
+
+                if (distanceGoalY == 0 && distanceX * distanceGoalX <= 0)
+                {
+                    Side += 3;
+                }
+                else if (distanceGoalX == 0 && distanceY * distanceGoalY <= 0)
+                {
+                    Side += 3;
+                }
+            }
+
+            for (int i = 0; i < Atoms.Length; i++)
+            {
+                var currAtom = Atoms[i];
+                for (int j = 0; j < goalPosition.Atoms.Length; j++)
+                {
+                    if (i == j) continue;
+                    var currAtomInGoal = goalPosition.Atoms[i];
+                    var diffX = goalPosition.Atoms[j].X - currAtomInGoal.X;
+                    var diffY = currAtomInGoal.Y - goalPosition.Atoms[j].Y;
+                    try
+                    {
+                        int y = currAtom.Y + diffY;
+                        int x = currAtom.X + diffX;
+
+                        if (y >= map.Count || y < 0)
+                        {
+                            Fit += 3;
+                            break;
+                        }
+
+                        if (x < 0 || x >= map[y].Length)
+                        {
+                            Fit += 3;
+                            break;
+                        }
+
+                        if (map[y][x] != '.')
+                        {
+                            Fit += 3;
+                            break;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e);
+                        throw;
+                    }
+                }
+
             }
 
             return h;
@@ -77,7 +142,7 @@ namespace Assets.Scripts
                 stringBuilder.AppendLine(row);
             }
 
-            stringBuilder.AppendLine($"F: {F}  G: {G}  H: {H}");
+            stringBuilder.AppendLine($"F: {F}  G: {G}  H: {H}  S:{Side}  Fit: {Fit}");
             stringBuilder.AppendLine($"Moved Atom: {MovedAtomName}  MovedAtomId: {MovedNodeuniqueId}  Vector: {RoundMove}");
 
             return stringBuilder.ToString();
@@ -115,10 +180,10 @@ namespace Assets.Scripts
 
 
 
-        public void calculateMovePriority(int g, Positions end)
+        public void calculateMovePriority(int g, Positions end, List<string> map)
         {
-            H = heuristic(end);
-            F = g + H;
+            H = heuristic(end, map);
+            F = g + H + Side + Fit;
             G = g;
         }
 
