@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,7 +14,9 @@ namespace Assets.Scripts
         Positions startPosition { get; set; }
         Positions endPosition { get; set; }
         PositionsPriorityQueue openList = new PositionsPriorityQueue();
-        HashSet<Positions> closeList = new HashSet<Positions>();
+        //HashSet<Positions> closeList = new HashSet<Positions>();
+        //Hashtable closeList = new Hashtable();
+        Dictionary<int, List<Positions>> closeList = new Dictionary<int, List<Positions>>();
         public List<string> Map = new List<string>();
         private readonly bool log;
         StreamWriter outputFile = File.AppendText("LevelCompletion.txt");
@@ -32,7 +35,7 @@ namespace Assets.Scripts
         public List<Positions> calculateAStar()
         {
             int tempI = 0;
-            startPosition.calculateMovePriority(0, endPosition);
+            startPosition.calculateMovePriority(0, endPosition, Map);
 
             Debug.Log(startPosition.ToString(Map));
 
@@ -41,14 +44,24 @@ namespace Assets.Scripts
             while(openList.Length > 0)
             {
                 tempI++;
-                if (tempI > 5000) {
+                if (tempI > 3000) {
                     Debug.Log($"Could not found solution in {tempI} tries");
+                    outputFile.Flush();
                     outputFile.Dispose();
                     return null;
                  }
                 var currPositions = openList.Dequeue();
-                closeList.Add(currPositions);
-                //Debug.Log($"CurrentPosition \n{currPositions.ToString(Map)}");
+
+                if (closeList.ContainsKey(currPositions.GetHashCode()))
+                {
+                    closeList[currPositions.GetHashCode()].Add(currPositions);
+                }
+                else
+                {
+                    var list = new List<Positions>();
+                    list.Add(currPositions);
+                    closeList.Add(currPositions.GetHashCode(), list);
+                }
 
                 if(log)
                 {
@@ -61,6 +74,7 @@ namespace Assets.Scripts
                 if (currPositions.compare(endPosition))
                 {
                     Debug.Log("We solved that :)))");
+                    outputFile.Flush();
                     outputFile.Dispose();
                     return calculatePath(currPositions, endPosition);
                 }
@@ -69,11 +83,20 @@ namespace Assets.Scripts
                 foreach (var (neighbour, index) in otherPositions.WithIndex())
                 {
                     var neighbourCostG = currPositions.G + 1;
-                    var neighbourInOpen = openList.Exists(neighbour);
-                    var neighbourExistsInCloseList = closeList.Contains(neighbour);
 
-                    neighbour.calculateMovePriority(neighbourCostG, endPosition);
+                    var neighbourInOpen = openList.Exists(neighbour);
+                    var neighbourInClose = closeList.TryGetValue(neighbour.GetHashCode(), out var closedHashedList) ? closedHashedList.Find(e => e.Equals(neighbour)) : null;
+
+                    neighbour.calculateMovePriority(neighbourCostG, endPosition, Map);
                     neighbour.parentPositions = currPositions;
+
+                    if (log)
+                    {
+                        outputFile.WriteLine("------------Expanding------------");
+                        string positionsInMap = neighbour.ToString(Map);
+                        outputFile.WriteLine(positionsInMap);
+
+                    }
 
                     if (neighbourInOpen != null)
                     {
@@ -84,11 +107,11 @@ namespace Assets.Scripts
                     } 
                     else
                     {
-                        if (neighbourExistsInCloseList)
+                        if (neighbourInClose != null)
                         {
-                            if (neighbourCostG < closeList.Where(curr => curr.Equals(neighbour)).First().G)
+                            if (neighbourCostG < neighbourInClose.G)
                             {
-                                closeList.Remove(neighbour);
+                                closeList[neighbour.GetHashCode()].Remove(neighbour);
                                 openList.Enqueue(neighbour);
                             }
                         }
@@ -101,6 +124,7 @@ namespace Assets.Scripts
 
             }
             Debug.Log($"Could not found solution Open List Empty");
+            outputFile.Flush();
             outputFile.Dispose();
             return null;
         }
@@ -135,15 +159,6 @@ namespace Assets.Scripts
 
 
                     if (currentPosition.Equals(position)) continue;
-                    //Debug.Log($"New state \n {position.ToString(Map)}");
-
-                    if (log)
-                    {
-                            outputFile.WriteLine("------------Expanding------------");
-                            string positionsInMap = position.ToString(Map);
-                            outputFile.WriteLine(positionsInMap);
-                        
-                    }
 
                     otherPosiblePositions.Add(position);
                     

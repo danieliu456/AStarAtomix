@@ -148,6 +148,7 @@ public class GameManager : MonoBehaviour
 
             if (log)
             {
+                if(listOfMoves != null)
                 using (StreamWriter outputFile = File.AppendText("LevelCompletion.txt"))
                 {
                     outputFile.WriteLine("------------FINISH------------");
@@ -162,23 +163,6 @@ public class GameManager : MonoBehaviour
                     }
                 }
             }
-
-
-
-
-            //var atomList = FindObjectsOfType<Atom>().Where(a => a.tag == "Atom");
-
-            //foreach (var atom in atomList)
-            //{
-            //    foreach (var item in "UDLR")
-            //    {
-            //        setMainAtom(atom);
-            //        atom.Move(item.getMovementCordinates());
-            //        NextLevelButton.SetActive(CheckIfLevelCompleted());
-
-            //        yield return new WaitForSeconds(0.5f);
-            //    }
-            //}
         }
         catch (Exception e)
         {

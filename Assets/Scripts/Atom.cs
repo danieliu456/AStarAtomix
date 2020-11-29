@@ -137,7 +137,7 @@ public class Node
 
     public override int GetHashCode()
     {
-        return Tuple.Create(X, Y).GetHashCode();
+        return Tuple.Create(X, Y, uniqueId).GetHashCode();
     }
 
 
