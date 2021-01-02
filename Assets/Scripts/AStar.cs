@@ -14,8 +14,6 @@ namespace Assets.Scripts
         Positions startPosition { get; set; }
         Positions endPosition { get; set; }
         PositionsPriorityQueue openList = new PositionsPriorityQueue();
-        //HashSet<Positions> closeList = new HashSet<Positions>();
-        //Hashtable closeList = new Hashtable();
         Dictionary<int, List<Positions>> closeList = new Dictionary<int, List<Positions>>();
         public List<string> Map = new List<string>();
         private readonly bool log;
@@ -29,7 +27,6 @@ namespace Assets.Scripts
             this.log = log;
             startPosition = start;
             endPosition = end;
-            //calculateAStar(start, end);
         }
          
         public List<Positions> calculateAStar()
@@ -68,16 +65,17 @@ namespace Assets.Scripts
                         outputFile.WriteLine("------------MinPriority------------");
                         string positionsInMap = currPositions.ToString(Map);
                         outputFile.WriteLine(positionsInMap);
+                        outputFile.Flush();
                 }
 
 
-                if (currPositions.compare(endPosition))
-                {
-                    Debug.Log("We solved that :)))");
-                    outputFile.Flush();
-                    outputFile.Dispose();
-                    return calculatePath(currPositions, endPosition);
-                }
+                //if (currPositions.compare(endPosition))
+                //{
+                //    Debug.Log("We solved that :)))");
+                //    outputFile.Flush();
+                //    outputFile.Dispose();
+                //    return calculatePath(currPositions, endPosition);
+                //}
                 var otherPositions = getOtherPositions(currPositions);
 
                 foreach (var (neighbour, index) in otherPositions.WithIndex())
@@ -87,8 +85,17 @@ namespace Assets.Scripts
                     var neighbourInOpen = openList.Exists(neighbour);
                     var neighbourInClose = closeList.TryGetValue(neighbour.GetHashCode(), out var closedHashedList) ? closedHashedList.Find(e => e.Equals(neighbour)) : null;
 
-                    neighbour.calculateMovePriority(neighbourCostG, endPosition, Map);
                     neighbour.parentPositions = currPositions;
+
+                    if (neighbour.compare(endPosition))
+                    {
+                        Debug.Log("We solved that :)))");
+                        outputFile.Flush();
+                        outputFile.Dispose();
+                        return calculatePath(neighbour, endPosition);
+                    }
+
+                    neighbour.calculateMovePriority(neighbourCostG, endPosition, Map);
 
                     if (log)
                     {
@@ -102,6 +109,7 @@ namespace Assets.Scripts
                     {
                         if (neighbourCostG < neighbourInOpen.G  )
                         {
+                            
                             openList.UpdatePriority(neighbour);
                         }
                     } 

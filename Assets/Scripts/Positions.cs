@@ -19,9 +19,15 @@ namespace Assets.Scripts
         }
         public int MovedNodeuniqueId { get; set; }
         public string MovedAtomName { get; set; }
+        public int deep { get; set; } = 0;
         public Vector2 RoundMove { get; set; }
         public int F { get; set; }
         public int G { get; set; }
+        public int M { get; set; }
+
+
+
+
         public int H { get; set; }
         public int Side { get; set; } = 0;
         public int Fit { get; set; } = 0;
@@ -31,24 +37,47 @@ namespace Assets.Scripts
 
         public int heuristic(Positions goalPosition, List<string> map)
         {
+            var mid = Atoms.Length / 2;
+            
             int h = 0;
             Node firstAtom = Atoms[0];
             Node firstGoalAtom = goalPosition.Atoms[0];
 
-            // Manhattan Distance between atoms
+            //Manheteno atstumas
             for (int i = 1; i < Atoms.Length; i++)
             {
+                //if (i == mid) continue;
+
                 var distanceX = Atoms[i].X - firstAtom.X;
                 var distanceY = Atoms[i].Y - firstAtom.Y;
 
-                var distanceGoalX = goalPosition.Atoms[i].X - firstGoalAtom.X;
-                var distanceGoalY = goalPosition.Atoms[i].Y - firstGoalAtom.Y;
+                var distanceGoalXx = goalPosition.Atoms[i].X - firstGoalAtom.X;
+                var distanceGoalYy = goalPosition.Atoms[i].Y - firstGoalAtom.Y;
 
-                h += Math.Abs(distanceGoalX - distanceX) + Math.Abs(distanceGoalY - distanceY);
+                h += Math.Abs(distanceGoalXx - distanceX) + Math.Abs(distanceGoalYy - distanceY);
             }
 
+            //for (int i = 1; i < Atoms.Length; i++)
+            //{
+            //    int gx, gy;
+
+            //    var distanceGoalX = goalPosition.Atoms[i].X - firstGoalAtom.X;
+            //    var distanceGoalY = firstGoalAtom.Y - goalPosition.Atoms[i].Y;
+
+            //    gx = firstAtom.X + distanceGoalX;
+            //    gy = firstAtom.Y + distanceGoalY;
+            //    //var mapWithAtoms = this.ToList(map);
+
+            //    Vector2 goalVector = new Vector2();
+            //    goalVector.x = gx;
+            //    goalVector.y = gy;
+            //    var (manhattan, deep) = bfs(Atoms, i, goalVector, map);
+            //    h += manhattan;
+            //    M += deep;
+            //}
+
+
             // Atoms side 
-            var mid = Atoms.Length / 2;
             Node MidAtom = Atoms[mid];
             Node MidGoalAtom = goalPosition.Atoms[mid];
             for (int i = 0; i < Atoms.Length; i++)
@@ -71,12 +100,13 @@ namespace Assets.Scripts
                 }
             }
 
+            bool fit = true;
             for (int i = 0; i < Atoms.Length; i++)
             {
                 var currAtom = Atoms[i];
                 for (int j = 0; j < goalPosition.Atoms.Length; j++)
                 {
-                    if (i == j) continue;
+                    if (i == j ) continue;
                     var currAtomInGoal = goalPosition.Atoms[i];
                     var diffX = goalPosition.Atoms[j].X - currAtomInGoal.X;
                     var diffY = currAtomInGoal.Y - goalPosition.Atoms[j].Y;
@@ -87,19 +117,22 @@ namespace Assets.Scripts
 
                         if (y >= map.Count || y < 0)
                         {
-                            Fit += 3;
+                            Fit += 4;
+                            fit = false;
                             break;
                         }
 
                         if (x < 0 || x >= map[y].Length)
                         {
-                            Fit += 3;
+                            Fit += 4;
+                            fit = false;
                             break;
                         }
 
                         if (map[y][x] != '.')
                         {
-                            Fit += 3;
+                            Fit += 4;
+                            //fit = false;
                             break;
                         }
                     }
@@ -110,7 +143,13 @@ namespace Assets.Scripts
                     }
                 }
 
+                //if (fit)
+                //{
+                //    break;
+                //}
             }
+
+            //if (!fit) Fit += (Atoms.Length - 1) * 3;
 
             return h;
         }
@@ -142,7 +181,7 @@ namespace Assets.Scripts
                 stringBuilder.AppendLine(row);
             }
 
-            stringBuilder.AppendLine($"F: {F}  G: {G}  H: {H}  S:{Side}  Fit: {Fit}");
+            stringBuilder.AppendLine($"F: {F}  G: {G}  H: {H}  S:{Side}  Fit: {Fit} Moves: {M}");
             stringBuilder.AppendLine($"Moved Atom: {MovedAtomName}  MovedAtomId: {MovedNodeuniqueId}  Vector: {RoundMove}");
 
             return stringBuilder.ToString();
@@ -179,11 +218,59 @@ namespace Assets.Scripts
         }
 
 
+        public (int, int) bfs(Node[] atoms, int atomToMove, Vector2 goalVector, List<string> map)
+        {
+            var startPosition = new Positions(atoms);
+            var visited = new List<Positions>();
+            var Queue = new Queue<Positions>();
+            int manhattan = 100, deep = 3;
+
+            Queue.Enqueue(startPosition);
+
+            while(Queue.Count > 0)
+            {
+                var currPosition = Queue.Dequeue();
+                var mapWithAtoms = currPosition.ToList(map);
+                int temp = (int)(Math.Abs(currPosition.Atoms[atomToMove].X - goalVector.x) + Math.Abs(currPosition.Atoms[atomToMove].Y - goalVector.y));
+
+                if (currPosition.deep > 1) return (manhattan, deep);
+
+                if (temp < manhattan)
+                {
+                    manhattan = temp;
+                    deep = currPosition.deep;
+                }
+
+                if (currPosition.Atoms[atomToMove].X == goalVector.x && currPosition.Atoms[atomToMove].Y == goalVector.y)
+                {
+                    return (manhattan, currPosition.deep);
+                }
+
+                foreach (var direction in "UDLR")
+                {
+                    var directionVector = MoveFactory.getMovementCoordinates(direction);
+
+                    var newAtom = Atoms[atomToMove].Move(mapWithAtoms, directionVector);
+
+                    var atomsClone = (Node[])currPosition.Atoms.Clone();
+
+                    atomsClone[atomToMove] = newAtom;
+                    Positions position = new Positions(atomsClone);
+
+                    if (currPosition.Equals(position) || visited.Contains(position)) continue;
+                    position.parentPositions = currPosition;
+                    position.deep = currPosition.deep + 1;
+                    Queue.Enqueue(position);
+                }
+            }
+
+            return (manhattan, deep);
+        }
 
         public void calculateMovePriority(int g, Positions end, List<string> map)
         {
             H = heuristic(end, map);
-            F = g + H + Side + Fit;
+            F = g + H + Side + Fit + M;
             G = g;
         }
 
